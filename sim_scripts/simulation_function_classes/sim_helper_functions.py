@@ -286,15 +286,6 @@ class sim_functions():
         return ranked_winners, eliminated_players
     
     def check_same_group(top_seeded_players, second_seeded_players, grouped_players):
-
-        # shuffle second seed
-
-        # check if top seeded player at index i was in the same group as second
-        # seeded player at index i
-
-        # if matchup is from same group, reshuffle and check again
-        # good function to do recursion
-
         """
         Summary:
             Take in two lists and compare if a shuffled version of the second list
@@ -488,6 +479,8 @@ class sim_functions():
             ro16_losers.append(res['loser'])
         
         # round of 8
+        # shuffle round of 16 winners
+        random.shuffle(ro16_winners)
         ro8_matchups = sim_functions.gen_matchups(first_group, ro16_winners)
         for matchup in ro8_matchups:
             res = sim_functions.sim_match(

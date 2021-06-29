@@ -7,10 +7,6 @@ from simulation_function_classes.create_model_input import match_info
 from simulation_function_classes.sim_helper_functions import sim_functions
 from catboost import CatBoostClassifier
 
-# set seeds
-# we want to keep randomness, so remove seed
-# np.random.seed(18)
-
 # Set up Postgres engine
 db_string = 'postgresql://postgres:impreza@localhost/projectdb'
 db = create_engine(db_string)
@@ -42,7 +38,7 @@ def sim_gsl():
         # Gather winners and losers
         top_seeds.append(group_winner)
         second_seeds.append(second_winner)
-        print(f"eliminated players: {eliminated_players}")
+        #print(f"eliminated players: {eliminated_players}")
         group_finishes.append(eliminated_players)
 
     # Append results for losers
@@ -53,12 +49,12 @@ def sim_gsl():
 
     # Generate playoff matchups
     playoff_matchups = sim_functions.gen_gsl_playoffs(top_seeds, second_seeds, groups_list)
-    print(playoff_matchups)
+    #print(playoff_matchups)
     # simulate playoffs
     playoff_results = sim_functions.playoffs_eight(playoff_matchups, model,\
                                                     period_start, db)
 
-    print(playoff_results.items())
+    #print(playoff_results.items())
 
     # Append rest of results
     # Check here for errors
@@ -69,7 +65,7 @@ def sim_gsl():
                 #print(f"eliminated player: {player}")
                 sim_results.loc[player][finish] += 1
         else:
-            print(f"{finish} : {players}")
+            #print(f"{finish} : {players}")
             sim_results.loc[players][finish] += 1
 
 # Simulation Information
@@ -105,17 +101,42 @@ assert len(player_list) == 16
 # Groups should have 4 players each
 groups_list = sim_functions.create_groups(player_list, 4)
 
+# Check if previous files exist
+# Load file
+# Count how many sims were run
+# Subtract 30000 to see how many more need to be run
+
 # Store simulation information
 finish_cols = ['group_stage', 'ro8', 'ro4', 'second', 'first']
 sim_results = pd.DataFrame(0, index=player_list, columns=finish_cols)
 
 # Designate number of simulations to run
-n_sims = 1
-
-# Run sims!!!!!
-for i in range(n_sims):
-    sim_gsl()
+n_sims = 30000
 
 # Export results
 filename = 'results/gsl_2021_sim_results.csv'
+
+# Run sims!!!!!
+print('Simulations starting...')
+for i in range(n_sims):
+    sim_gsl()
+
+    if (i+1) % 500 == 0: # at every 1000 simulation, print progress and save results
+        # Print progress
+        print(f"Simulation run: {i+1}")
+        progress = round(((i+1)/n_sims)*100, 3)
+        print(f"GSL Simulations run: {i+1}")
+        print(f"GSL: {progress}%")
+
+        # Save temp results
+        sim_results.to_csv(filename)
+
+print('Simulations finished.')
+
+# Create a DataFrame to store finishes as percentages
+sim_results_perc = sim_results / n_sims
+
+# Export finished results
 sim_results.to_csv(filename)
+sim_results_perc.to_csv('results/gsl_2021_sim_results_perc.csv')
+print('Results saved.')

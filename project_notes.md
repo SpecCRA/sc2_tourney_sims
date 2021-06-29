@@ -1,8 +1,4 @@
 # Database Notes & Problems
-	* Don't fully understand ratings table
-	* Ratings don't match up to ratings shown on website
-	* all types of ratings are low numbers whereas site shown ratings are in the thousands
-	* also do not understand smoothed, precision
 	* overall rating is an average of 3 matchup ratings
 	* Number of games
 		* Terran: 179978
@@ -29,55 +25,73 @@
 	* No real data shrinking had to occur because this is a database with a large majority of ranked players
 
 # Prediction Algorithm
-	* Try 6 models: 1 for each matchup
-	* Try 1 big model: using all data
+	* Tried logistic regression, SVM, XGBoost, CatBoost
 	* Caveat: data is based on matches won
 		* the winner encoding does not account for bo1, bo3, bo5, or bo7
 	* CV: stratified k-fold, regular k-fold
 		* data is already shuffled in train-test splitting
 		* data is also pretty balanced, so no need for stratified k-fold
 	* Removing too many features made everything worse
+		* things like ranking among matchup helped
 	* Completely ignoring time restraint when it comes to training/test models
 	* removing extraneous (-1000, -2000, etc) ratings made prediction worse
-	* removing random also made everything worse
-	* conclusion: keep all the data in there
+	* removing random also made everything slightly worse
+	* added player age into the features
+	* added whether player A was higher ranked than player B as a feature
 	* grab feature importances to show in report
-	* look at how model performs on different categorizations
-		* accuracy rates per match-up
-		* maybe over patches (period)
-		* rating differences
+	* optimizing feature: accuracy
 	* Test set: Last 20% of data, most recent matches
-	* Where incorrect predictions can occur:
-		* players like Serral, Rogue, and Maru consistently have high ratings
-		* However, there are times when they get upset even though the model would likely predict they win everything
-		* But I'm unsure where the model is unsure of itself
 	* Final model: optimized catboost, only slightly better than logistic regression
 	* Null rate: 0.588165504968115 - this is the rate where one rating is simply higher than another
 
 # Simulation Script
-	* Group stages
-		* round robin
-		* 2 beginning seeded matches, 1 winner match, 1 loser match, final elimination match
-		* 2 players coming out of group stage with 5 matches
-		* round robin can have 3 because typically 6 players are in them
-	* Playoffs
-		* determine a way for players to be seeded
-		* first winner goes to top 4 seeds then plays winner of final elimination
-		* but also look into how SSL does round robin outcomes
-	* Store outcomes and match scores
-		* one function to generate results
-		* one function to store
-	* Prediction
-		* Set up rating system through an SQL query
-		* Pick a number from 1-1000 WITH replacement
-		* One end being probability of player A
-		* Other being probability of player B
 	* Tournaments selected
 		* IEM Katowice 2020: https://liquipedia.net/starcraft2/IEM_Katowice/2020
 		* IEM Katowice 2021: https://liquipedia.net/starcraft2/IEM_Katowice/2021
 		* GSL Season 3 2020: https://liquipedia.net/starcraft2/Global_StarCraft_II_League/2020/Season_3
+
+	* Match simulation setup:
+		* Each map is treated as an independent event and will not rely on result of previous maps.
+	* Player selection:
+		* The list of players is taken directly from each tournament page.
+		* The player list is the players who have qualified to play in the main tournaments.
+	* Group creation is completely random and no seed is used.
+	* GSL tournament formatting:
+		* Caveat 1: groups are randomly seeded as opposed to relying on seeding from a ranking system
+			* The group stage, round of 16 are chosen by the players in a particular format, and the resulting groups are not entirely even. There is often one or two peculiarly stacked groups.
+			* I cannot programmatically account for the top seed's ability to change group dynamics by switching two players. There is no good way for me to manage player psychology in instances such as how certain players do not like playing against Protoss opponents.
+		* Playoffs seeding:
+			* The seeding format mimics how the modern GSL works.
+				* Group winners play second seeded players.
+				* Players from the same group will not play each other in the round of 8.
+				* Second seeded players are shuffled and randomly drawn to each top seeded player.
+	* Katowice tournament formatting:
+		* Groups are again randomly chosen.
+		* Groups winners are calculated by the following terms:
+			* match wins
+			* map wins
+			* direct matchups
+		* Playoff brackets mimic the 2020 and 2021 formats.
+			* Group winners pass immediately to round of 8 to play round of 16 winners.
+			* Second place and third place play one another.
+			* Players from the same group cannot play each other in round of 16.
+			* Third place players are shuffled.
+			* Round of 16 winners are shuffled.
+			* Previous points are in place to ensure first place group winners do not often play their second place group mates.
+			* Third and fourth place match is played by round of 4 losers.
+	* Data recorded:
+		* Where players finish: group stage or some round of playoffs.
+	* What is encapsulated by this simulation setup:
+		* Bracket fluctuations - player and matchups are shuffled around.
+		* There are times when players get favorable brackets for their preferred matchups.
+		* Race vs Race dynamics. For instance, if TvP is historically Protoss favored, there may be a slight bias towards favoring a Protoss player in that matchup.
+	* What to look for:
+		* Double elimination group versus round robin robustness
+		* Were the actual results a surprise?
 	* Questions
 		* how to manage uncertainty?
+			* model uncertainty
+			* how brackets play out
 
 # Resources
 	* CatBoost optimization guide: https://ai.plainenglish.io/catboost-cross-validated-bayesian-hyperparameter-tuning-91f1804b71dd

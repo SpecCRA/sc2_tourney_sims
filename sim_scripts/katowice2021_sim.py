@@ -6,6 +6,8 @@ from sqlalchemy import create_engine
 from simulation_function_classes.create_model_input import match_info
 from simulation_function_classes.sim_helper_functions import sim_functions
 from catboost import CatBoostClassifier
+import os
+import time
 
 # Set up Postgres engine
 db_string = 'postgresql://postgres:impreza@localhost/projectdb'
@@ -48,7 +50,7 @@ def sim_tournament():
     # Store eliminated player results into DataFrame
     for eliminated in group_finishes:
         for player in eliminated:
-            sim_results.loc[player]['group_stage'] += 1
+            sim_results.loc[player, 'group_stage'] += 1
     
     # Run playoffs
     playoff_results = sim_functions.playoffs_sixteen(
@@ -58,9 +60,9 @@ def sim_tournament():
     for finish, players in playoff_results.items():
         if type(players) == list:
             for player in players:
-                sim_results.loc[player][finish] += 1
+                sim_results.loc[player, finish] += 1
         else:
-            sim_results.loc[players][finish] += 1
+            sim_results.loc[players, finish] += 1
 
 # Simulation information
 
@@ -75,12 +77,12 @@ player_list = [
     'neeb',
     'cure',
     'innovation',
+    'maru',
     'ty',
     'clem',
     'heromarine',
     'special',
     'time',
-    'bunny',
     'bunny',
     'byun',
     'dream',
@@ -93,27 +95,54 @@ player_list = [
 ]
 
 # Period
-# Tournament ran from 2021-02-20 to 2020-02-28
+# Tournament ran from 2021-02-20 to 2021-02-28
 # Start date was adjusted to get correct period
-period_start = '2021/02/20'
+period_start = '2021/02/10'
 
 # Ensure player count is correct
 assert len(player_list) == 24
 
-# Store sim results
-finish_cols = ['group_stage', 'ro16', 'ro8', 'fourth', 'third', 'second', 'first']
-sim_results = pd.DataFrame(0, index=player_list, columns=finish_cols)
+# Check if previous sim was run
+existing_path = '/home/specc/Documents/school_files/thesis/sim_scripts/results/katowice_2021_sim_results.csv'
+if os.path.exists(existing_path):
+    sim_results = pd.read_csv(existing_path, index_col=0)
+    # check how many sims have already run
+    sim_start = sim_results['first'].sum()
+    print(f"{sim_start} simulations already run.")
+else:
+    # Initialize DataFrame
+    finish_cols = ['group_stage', 'ro16', 'ro8', 'fourth', 'third', 'second', 'first']
+    sim_results = pd.DataFrame(0, index=player_list, columns=finish_cols)
+    sim_start = 0
 
 # Designate number of simulations to run
-n_sims = 1
+n_sims = 30000
+
+# Resulting filename
+filename = 'results/katowice_2021_sim_results.csv'
 
 # Run simulations
-for i in range(n_sims):
+print('Katowice 2021 simulations starting...')
+for i in range(sim_start, n_sims):
     sim_tournament()
+
+    if (i+1) % 500 == 0: # every 1000 sims, print progress and save results
+        # Print progress
+        print(f"Simulation run: {i+1}")
+        progress = round(((i+1)/n_sims)*100, 3)
+        print(f"IEM 2021 Simulations run: {i+1}")
+        print(f"IEM 2021: {progress}%")
+        print(f"Current time: {time.strftime('%H:%M:S', time.localtime())}")
+
+        # Save temporary results
+        sim_results.to_csv(filename)
 
 print('Simulation finished.')
 
-# Export results
-filename = 'results/katowice_2021_sim_results.csv'
+# Create a DataFrame to store finishes as percentages
+sim_results_perc = sim_results / n_sims
+
+# Export  final results
 sim_results.to_csv(filename)
+sim_results_perc.to_csv('results/katowice_2021_sim_results_perc.csv')
 print('Results saved.')

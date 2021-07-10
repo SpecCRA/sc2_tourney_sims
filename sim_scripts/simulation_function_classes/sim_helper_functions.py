@@ -234,6 +234,7 @@ class sim_functions():
         results_df['map_wins_rank'] = results_df['map_wins'].rank(ascending=False, method='dense')
 
         # store players in proper rank
+        players_present = list(results_df['player'])
         ranked_players = list()
 
         # see what values are in each ranks
@@ -280,8 +281,17 @@ class sim_functions():
         # return two lists
         # 1. continuing players, ranked 1-3 by order of list
         # 2. eliminated players where rank does not matter
+        #assert len(ranked_players) == 6
+
+        if len(ranked_players) < 6:
+            print(ranked_players)
+
         ranked_winners = ranked_players[:3]
         eliminated_players = ranked_players[3:]
+
+        ############# BUG REPORT ###############
+        # ranked players doesn't seem to have 6 players
+        #assert len(eliminated_players) == 3
 
         return ranked_winners, eliminated_players
     
@@ -518,5 +528,8 @@ class sim_functions():
             'ro8' : ro8_losers,
             'ro16' : ro16_losers
         }
+
+        assert len(ro16_losers) == 4
+        assert len(ro8_losers) == 4
 
         return results

@@ -40,6 +40,35 @@
 	* added whether player A was higher ranked than player B as a feature
 	* grab feature importances to show in report
 	* optimizing feature: accuracy
+	* Features used:
+		['rating_a',
+		'rating_vp_a',
+		'rating_vt_a',
+		'rating_vz_a',
+		'position_a',
+		'position_vp_a',
+		'position_vt_a',
+		'position_vz_a',
+		'rating_b',
+		'rating_vp_b',
+		'rating_vt_b',
+		'rating_vz_b',
+		'position_b',
+		'position_vp_b',
+		'position_vt_b',
+		'position_vz_b',
+		'race_a_P',
+		'race_a_T',
+		'race_a_Z',
+		'race_b_P',
+		'race_b_T',
+		'race_b_Z',
+		'player_a_eff_rating',
+		'player_b_eff_rating',
+		'ratings_diff',
+		'higher_ranked_a',
+		'age_a',
+		'age_b']
 	* Test set: Last 20% of data, most recent matches
 	* Final model: optimized catboost, only slightly better than logistic regression
 	* Null rate: 0.588165504968115 - this is the rate where one rating is simply higher than another
@@ -88,10 +117,15 @@
 	* What to look for:
 		* Double elimination group versus round robin robustness
 		* Were the actual results a surprise?
+	* Bugs and notes
+		* Some group stage finishes were dropped during the Katowice (2020 and 2021) scripts. These were imputed by adding what was missing to the group stage finishes.
 	* Questions
 		* how to manage uncertainty?
 			* model uncertainty
 			* how brackets play out
+
+# Analysis
+	* Funnels don't work with each player's progress. The numbers don't always shrink.
 
 # Resources
 	* CatBoost optimization guide: https://ai.plainenglish.io/catboost-cross-validated-bayesian-hyperparameter-tuning-91f1804b71dd

@@ -22,7 +22,7 @@ model = CatBoostClassifier()
 model.load_model(model_path)
 
 def sim_tournament():
-    # Initialize data structures
+    # Initialize group finishing data structures
     group_finishes = list()
     top_seeds = list()
     second_seeds = list()

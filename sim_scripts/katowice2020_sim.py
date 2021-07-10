@@ -22,7 +22,7 @@ model = CatBoostClassifier()
 model.load_model(model_path)
 
 def sim_tournament():
-    # Initialize data structures
+    # Initialize group finishing data structures
     group_finishes = list()
     top_seeds = list()
     second_seeds = list()
@@ -116,7 +116,7 @@ else:
     sim_start = 0
 
 # Designate number of simulations to run
-n_sims = 30000
+n_sims = 20
 
 # Results filename
 filename = 'results/katowice_2020_sim_results.csv'

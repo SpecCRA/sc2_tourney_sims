@@ -283,8 +283,8 @@ class sim_functions():
         # 2. eliminated players where rank does not matter
         #assert len(ranked_players) == 6
 
-        if len(ranked_players) < 6:
-            print(ranked_players)
+        #if len(ranked_players) < 6:
+        #    print(ranked_players)
 
         ranked_winners = ranked_players[:3]
         eliminated_players = ranked_players[3:]
@@ -463,8 +463,8 @@ class sim_functions():
             Python dictionary for each finish.
             ro16 and ro8 losers have 4 players each.
         """
-        ro16_losers = list()
-        ro16_winners = list()
+        ro12_losers = list()
+        ro12_winners = list()
         ro4_players = list()
         ro8_losers = list()
         ro4_losers = list()
@@ -479,19 +479,19 @@ class sim_functions():
 
         # round of 16
         # generate ro16 matchups
-        ro16_matchups = sim_functions.gen_matchups(second_group, third_group)
+        ro12_matchups = sim_functions.gen_matchups(second_group, third_group)
         # round of 16
-        for matchup in ro16_matchups:
+        for matchup in ro12_matchups:
             res = sim_functions.sim_match(
                 matchup[0], matchup[1], 5, model, period_start, db
             )
-            ro16_winners.append(res['winner'])
-            ro16_losers.append(res['loser'])
+            ro12_winners.append(res['winner'])
+            ro12_losers.append(res['loser'])
         
         # round of 8
         # shuffle round of 16 winners
-        random.shuffle(ro16_winners)
-        ro8_matchups = sim_functions.gen_matchups(first_group, ro16_winners)
+        random.shuffle(ro12_winners)
+        ro8_matchups = sim_functions.gen_matchups(first_group, ro12_winners)
         for matchup in ro8_matchups:
             res = sim_functions.sim_match(
                 matchup[0], matchup[1], 5, model, period_start, db
@@ -526,10 +526,10 @@ class sim_functions():
             'third' : third_place_match['winner'],
             'fourth' : third_place_match['loser'],
             'ro8' : ro8_losers,
-            'ro16' : ro16_losers
+            'ro12' : ro12_losers
         }
 
-        assert len(ro16_losers) == 4
+        assert len(ro12_losers) == 4
         assert len(ro8_losers) == 4
 
         return results

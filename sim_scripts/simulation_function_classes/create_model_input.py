@@ -94,7 +94,8 @@ class match_info():
         replacement_birthdays = {
             5414: pd.to_datetime('2002-07-01'), # reynor
             5878: pd.to_datetime('2002-04-08'), # clem
-            4134: pd.to_datetime('1998-03-08') # astrea
+            4134: pd.to_datetime('1998-03-08'), # astrea,
+            19591: pd.to_datetime('2004-01-01') # maxpax
         }
 
         birthday = pd.to_datetime(
